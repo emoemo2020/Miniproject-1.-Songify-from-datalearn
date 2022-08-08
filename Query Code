@@ -1,0 +1,147 @@
+/*Давайте посмотрим, 
+какие тарифные планы используют премиум-пользователи*/
+select 
+    pu.user_id, 
+    pl.description
+from 
+    songify.plans pl
+join
+    songify.premium_users pu
+        on pl.id = pu.membership_plan_id;
+
+/*Давайте посмотрим названия песен, время и 
+дату прослушивания 
+которые cлушает каждый пользователь*/
+
+select 
+    p.user_id,
+    s.title,
+    p.play_date,
+    p.play_hour
+from songify.plays p
+
+left join
+    songify.songs s 
+        on p.song_id = s.id;
+
+/*Какие пользователи не являются премиум-пользователями?*/
+
+select 
+    u.id
+from
+    songify.users u
+where
+    u.id not in 
+        (select 
+            t.user_id 
+         from 
+            songify.premium_users t );
+
+--С помощью СTE найдите пользователей, 
+--которые слушали музыку в январе и феврале, а потом оставьте
+--только тех пользователей, которые слушали музыку ТОЛЬКО в январе.
+
+with january_listeners as 
+            (select 
+                p.*
+             from songify.plays p
+             where extract(month from p.play_date) = 1),
+
+february_listeners as 
+            (select 
+                p.user_id
+            from songify.plays p
+            where extract(month from p.play_date) = 2)
+
+
+select 
+    *
+from 
+    january_listeners t
+where t.user_id not in 
+            (select 
+                p.user_id
+             from songify.plays p
+             where extract(month from p.play_date) = 2);
+
+--Другой вариант решения
+
+WITH january AS
+	(SELECT
+		*
+	FROM
+		songify.plays
+	WHERE
+		EXTRACT(MONTH FROM play_date) = 1),
+	
+february AS
+	(SELECT
+		*
+	FROM
+		songify.plays
+	WHERE
+		EXTRACT(MONTH FROM play_date) = 2)
+
+
+SELECT
+	*
+FROM
+	january AS j
+LEFT JOIN
+	february AS f
+		ON j.user_id = f.user_id 
+WHERE
+	f.user_id IS NULL;
+
+/*Для каждого месяца в таблице months мы хотим знать, 
+был ли каждый премиум-пользователь
+активным или удаленным (не продлевал 
+свою подписку на сервис)*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
