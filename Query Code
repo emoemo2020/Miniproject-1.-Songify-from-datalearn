@@ -95,53 +95,73 @@ WHERE
 
 /*Для каждого месяца в таблице months мы хотим знать, 
 был ли каждый премиум-пользователь
-активным или удаленным (не продлевал 
-свою подписку на сервис)*/
+активным или удаленным (не продлевал свою 
+подписку на сервис)*/
+
+SELECT
+	pu.user_id,
+	pu.purchase_date::date AS purchase_date,
+	pu.cancel_date::date AS cancel_date,
+	m.months::date
+FROM
+	songify.months AS m
+CROSS JOIN
+	songify.premium_users AS pu;
 
 
+--Определить какие пользователи у нас активные, 
+--а какие не активные в каждом месяце
+SELECT
+	pu.user_id,
+  	m.months,
+	CASE
+    	WHEN (pu.purchase_date <= m.months)
+      		AND
+      		(pu.cancel_date >= m.months OR pu.cancel_date IS NULL)
+    	THEN 'active'
+    	ELSE 'not_active'
+  	END AS status
+FROM
+	songify.months AS m
+CROSS JOIN
+	songify.premium_users AS pu;
 
+/*Объедините таблицу songs и bonus_songs с помощью UNION и 
+выберите все столбцы.
+Поскольку таблица songs очень большая, просто посмотрите 
+на некий срез данных
+и выведите только 100 строк с помощью LIMIT.*/
 
+select * from songify.songs
+union
+select * from songify.bonus_songs
+limit 100;
 
+/*Найти количество раз, которое была прослушана каждая песня,
+добавить дополнительную информацию из таблицs songs */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+with all_songs as 
+        (select 
+            *
+         from 
+             songify.plays p
+         left join
+            songify.songs s on p.song_id = s.id)
     
+select
+    t.title,
+    t.artist,
+    t.song_id,
+    count(*) as "times_played"
+from
+    all_songs t
+group by 
+    t.title,
+    t.artist,
+    t.song_id
+order by 
+    "times_played"  desc ;
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
 
